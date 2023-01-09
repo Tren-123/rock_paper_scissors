@@ -17,3 +17,9 @@ def room(request, room_name):
 
 def game(request):
     return render(request, 'game.html')
+
+def game_online(request):
+    return render(request, 'game_online.html')
+
+def game_room(request, pk):
+    return render(request, 'game_room.html')

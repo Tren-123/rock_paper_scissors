@@ -1,0 +1,22 @@
+{% extends "base_template.html" %}
+
+{% block content %}
+{% load static %}
+<h1>Welcome to Rock-Paper-Scissors game!</h1>
+<h2>Rules reminder</h2>
+<ul id="list-of-rules">
+    <li>You and your opponent have 3 different weapons for round - the Rock, the Paper and the Scissors</li>
+    <li>Rock beats Scissors, Scissors beats Paper, Paper beats Rock</li>
+    <li>Each round you and your opponent choosing 1 weapon</li>
+    <li>If your weapon beats opponents weapon - your win</li>
+</ul>
+<div class="playground">
+    <p id="start-game-para"><button id="start-game">Start the game</button></p>
+    <p id="choosing-text"></p>
+    <div class="weapons"></div>
+    <p id="user-weapon"></p>
+    <p id="opponent-weapon"></p>
+    <p id="winner"></p>
+</div>
+<script src="{% static 'js/game_online.js' %}"></script>
+{% endblock %}

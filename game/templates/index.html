@@ -1,24 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <!-- CSS only -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
-    {% load static %}
-</head>
-<body>
-    <h1>Rock Paper Scissors game</h1>
-    <div class="container">
-        <div class="row">
-            <div class="col-10 mx-auto mt-5">
-                <h2 id="app">{{ text }}</h2>
-            </div>
-        </div>
-    </div>
+{% extends "base_template.html" %}
 
-    <script src="{% static 'js/main.js' %}"></script>
-</body>
-</html>
+{% block content %}
+{% load static %}
+<h1>Welcome to Rock-Paper-Scissors game!</h1>
+<h2>List of available game</h2>
+<div id="available-game-div"><ul id="available-game"></ul></div>
+<form action=""><input type="text" placeholder="Input room name"><button id="create-game">Start game</button></form>
+<form action=""><input type="text" placeholder="Input room name"><button id="join-game">Search existing game</button></form>
+<script src="{% static 'js/index.js' %}"></script>
+{% endblock %}
