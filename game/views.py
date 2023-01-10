@@ -23,3 +23,7 @@ def game_online(request):
 
 def game_room(request, pk):
     return render(request, 'game_room.html')
+
+def create_game(request):
+    if request.method == 'POST':
+        print(request.POST)

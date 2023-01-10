@@ -20,3 +20,9 @@ let socket = new WebSocket('ws://' + window.location.host + '/ws' + window.locat
 // const owner
 // const opponent
 console.log('ws://' + window.location.host + '/ws' + window.location.pathname)
+
+socket.onmessage = function(e){
+    let djangoData = JSON.parse(e.data);
+    winner.innerHTML = djangoData.value
+    console.log(djangoData)
+}

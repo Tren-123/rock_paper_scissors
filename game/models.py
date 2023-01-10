@@ -13,8 +13,8 @@ class Test_model(models.Model):
 class Game(models.Model):
     """ Model to represent game condition """
     game_name = models.CharField(max_length=20, default='game')
-    owner = models.ManyToManyField(to=User, related_name='owner')
-    participant  = models.ManyToManyField(to=User, related_name='participant', blank=True)
+    owner = models.ForeignKey(User, related_name= 'owner', null=True, on_delete=models.SET_NULL)
+    opponent  = models.ForeignKey(User, related_name= 'opponent', null=True, blank=True, on_delete=models.SET_NULL)
     game_end_status = models.BooleanField(default=False)
     winner = models.PositiveIntegerField(default=0)
     date_of_the_game = models.DateTimeField(auto_now_add=True)
