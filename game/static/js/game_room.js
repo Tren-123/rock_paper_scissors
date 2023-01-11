@@ -4,10 +4,10 @@ const choosingText = document.querySelector('#choosing-text') // para for insert
 const userWeapon = document.querySelector('#user-weapon') // string with user weapon 
 const opponentWeapon = document.querySelector('#opponent-weapon') // string with opponent weapon 
 const winner = document.querySelector('#winner') // string with winer results
-const wpnDict = { // dictionary with {myWeapon : [win if opp have this weapon, lose if opp have this weapon, draw if opp have this weapon]}
-    rock : ['scissors', 'paper', 'rock'],
-    paper : ['rock', 'scissors', 'paper'],
-    scissors : ['paper', 'rock', 'scissors']
+const wpnDict = { // dictionary with {1st letter of weapon : full name of weapon}
+    r : 'Rock',
+    p : 'Paper',
+    s : 'Scissors'
 }
 let rockButton = document.querySelector('#rock') // var for Rock button
 let paperButton = document.querySelector('#paper') // var for Paper button
@@ -21,8 +21,29 @@ let socket = new WebSocket('ws://' + window.location.host + '/ws' + window.locat
 // const opponent
 console.log('ws://' + window.location.host + '/ws' + window.location.pathname)
 
+
+for (weapon of weapons.childNodes) {
+        
+    weapon.addEventListener('click', function() {
+        socket.send(JSON.stringify({
+            'message':  'weapon_choose',
+            'weapon':  this.innerText
+        }));
+        console.log(`weapon of this user ${this.innerText}`)
+        
+    })
+}
+
 socket.onmessage = function(e){
     let djangoData = JSON.parse(e.data);
-    winner.innerHTML = djangoData.value
-    console.log(djangoData)
+    console.log(djangoData);
+    if (djangoData.type = 'send_result'){
+        userWeapon.innerText = wpnDict[djangoData.owner_weapon];
+        opponentWeapon.innerText = wpnDict[djangoData.opponent_weapon];
+        if (djangoData.winner){
+        winner.innerText = djangoData.winner}
+        else{
+            winner.innerText = 'Draw'
+        }
+    }
 }

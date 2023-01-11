@@ -47,6 +47,11 @@ class GameRoomConsumer(WebsocketConsumer):
         self.game = None
         self.user = None
         self.role = None
+        self.owner = None
+        self.opponent = None
+        self.owner_weapon = None
+        self.opponent_weapon = None
+
     def connect(self):
         self.user = self.scope['user']
         self.game_id = self.scope['url_route']['kwargs']['pk']
@@ -60,6 +65,7 @@ class GameRoomConsumer(WebsocketConsumer):
             print(f'i am onwer - { self.game.owner}')
             self.accept()
             self.role = 'owner'
+    
         elif self.user == self.game.opponent:
             print(f'i am opponent - { self.game.opponent}')
             self.accept()
@@ -74,7 +80,77 @@ class GameRoomConsumer(WebsocketConsumer):
         )
     
     def receive(self, text_data=None, bytes_data=None):
-        pass
+        text_data_json = json.loads(text_data)
+
+        if text_data_json['message'] == 'weapon_choose':
+            if self.role == 'owner':
+                self.owner_weapon = text_data_json['weapon'][0].lower()
+                async_to_sync(self.channel_layer.group_send)(
+                self.game_group_name,
+                {
+                    'type': 'owner_weapon_choosed',
+                    'user': self.user.username,
+                    'owner_weapon': f'{self.owner_weapon}',
+                }
+            )
+
+            elif self.role == 'opponent':
+                self.opponent_weapon = text_data_json['weapon'][0].lower()
+                async_to_sync(self.channel_layer.group_send)(
+                self.game_group_name,
+                {
+                    'type': 'opponent_weapon_choosed',
+                    'user': self.user.username,
+                    'opponent_weapon': f'{self.opponent_weapon}',
+                }
+            )
+
+
+    def game_referee(self):
+        referee_dict = { 
+            'r' : ['s', 'p', 'r'],
+            'p' : ['r', 's', 'p'],
+            's' : ['p', 'r', 's']
+        }
+        winner = None
+        if self.opponent_weapon == referee_dict[self.owner_weapon][0]:
+            winner = self.owner
+        elif self.opponent_weapon == referee_dict[self.owner_weapon][1]:
+            winner = self.opponent
+        elif self.opponent_weapon == referee_dict[self.owner_weapon][2]:
+            winner = False
+        print(winner)
+        
+        async_to_sync(self.channel_layer.group_send)(
+                self.game_group_name,
+                {
+                    'type': 'send_result',
+                    'owner': self.owner,
+                    'opponent': self.opponent,
+                    'winner': winner,
+                    'owner_weapon': self.owner_weapon,
+                    'opponent_weapon': self.opponent_weapon,
+                }
+            )
+        self.owner_weapon, self.opponent_weapon = None, None
+
+    def owner_weapon_choosed(self, event):
+        self.owner_weapon = event['owner_weapon']
+        self.owner = event['user']
+        if self.role == 'owner' and self.opponent_weapon != None:
+            self.game_referee()
+
+
+    def opponent_weapon_choosed(self, event):
+        self.opponent_weapon = event['opponent_weapon']
+        self.opponent = event['user']
+        if self.role == 'owner' and self.owner_weapon != None:
+            self.game_referee()
+
+    def send_result(self, event):
+        self.send(text_data=json.dumps(event))
+    
+
 
 class GameOnlineConsumer(WebsocketConsumer):
     def connect(self):
@@ -93,70 +169,3 @@ class GameOnlineConsumer(WebsocketConsumer):
         to_db.save()
 
 
-
-class AsyncGameConsumer(AsyncWebsocketConsumer):
-    async def connect(self):
-        self.group_name = "game_test"
-        print(self.scope['user'], self.scope['session'])
-        # Join game group
-        await self.channel_layer.group_add(self.group_name, self.channel_name)
-
-        await self.accept()
-
-    async def disconnect(self, close_code):
-        # Leave room group
-        await self.channel_layer.group_discard(self.group_name, self.channel_name)
-
-    # Receive message from WebSocket
-    async def receive(self, text_data):
-        text_data_json = json.loads(text_data)
-        print(text_data_json)
-        if text_data_json["user_join"]:
-            print('User join!!!')
-        else:
-            message = text_data_json["message"]
-            # Send message to room group
-            await self.channel_layer.group_send(
-                self.group_name, {"type": "chat_message", "message": message, "user": str(self.scope['user'])}
-            )
-
-    # Receive message from room group
-    async def chat_message(self, event):
-        message = event["message"]
-        print(event)
-
-        # Send message to WebSocket
-        await self.send(text_data=json.dumps({"message": message}))
-
-
-
-class ChatConsumer(AsyncWebsocketConsumer):
-    async def connect(self):
-        self.room_name = self.scope["url_route"]["kwargs"]["room_name"]
-        self.room_group_name = "chat_%s" % self.room_name
-
-        # Join room group
-        await self.channel_layer.group_add(self.room_group_name, self.channel_name)
-
-        await self.accept()
-
-    async def disconnect(self, close_code):
-        # Leave room group
-        await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
-
-    # Receive message from WebSocket
-    async def receive(self, text_data):
-        text_data_json = json.loads(text_data)
-        message = text_data_json["message"]
-
-        # Send message to room group
-        await self.channel_layer.group_send(
-            self.room_group_name, {"type": "chat_message", "message": message}
-        )
-
-    # Receive message from room group
-    async def chat_message(self, event):
-        message = event["message"]
-
-        # Send message to WebSocket
-        await self.send(text_data=json.dumps({"message": message}))
