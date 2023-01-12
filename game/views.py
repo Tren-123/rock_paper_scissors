@@ -1,19 +1,11 @@
 from django.shortcuts import render
+from .models import Game
 
 def index(request):
     """ View function for index page """
-
-    context = {
-        'text' : 'Game here'
-    }
-    return render(request, 'index.html', context=context)
+    return render(request, 'index.html')
 
 
-def chat_index(request):
-    return render(request, 'chat_index.html')
-
-def room(request, room_name):
-    return render(request, "room.html", {"room_name": room_name})
 
 def game(request):
     return render(request, 'game.html')
@@ -22,8 +14,11 @@ def game_online(request):
     return render(request, 'game_online.html')
 
 def game_room(request, pk):
-    return render(request, 'game_room.html')
-
-def create_game(request):
-    if request.method == 'POST':
-        print(request.POST)
+    game = Game.objects.get(id=pk)
+    context = {
+        'game_owner' : game.owner,
+        'game_opponent' : game.opponent,
+        'pk' : pk,
+        'game_end_status' : game.game_end_status,
+    }
+    return render(request, 'game_room.html', context=context)

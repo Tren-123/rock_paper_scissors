@@ -70,7 +70,14 @@ class GameRoomConsumer(WebsocketConsumer):
             print(f'i am opponent - { self.game.opponent}')
             self.accept()
             self.role = 'opponent'
-
+            async_to_sync(self.channel_layer.group_send)( #DONT WORK AS EXSPECTED NEED TO FIX (not send message after opponent connected sometime)
+                self.game_group_name,
+                {
+                    'type': 'opponent_join_1',
+                    'user': self.user.username,
+                }
+            )
+            
 
     def disconnect(self, close_code):
         print(f'connection forbiden or lost, close code {close_code}')
@@ -89,7 +96,7 @@ class GameRoomConsumer(WebsocketConsumer):
                 self.game_group_name,
                 {
                     'type': 'owner_weapon_choosed',
-                    'user': self.user.username,
+                    'owner': (self.user.username, self.user.id),
                     'owner_weapon': f'{self.owner_weapon}',
                 }
             )
@@ -100,13 +107,13 @@ class GameRoomConsumer(WebsocketConsumer):
                 self.game_group_name,
                 {
                     'type': 'opponent_weapon_choosed',
-                    'user': self.user.username,
+                    'opponent': (self.user.username, self.user.id),
                     'opponent_weapon': f'{self.opponent_weapon}',
                 }
             )
+    
 
-
-    def game_referee(self):
+    def game_referee(self): #DONT WORK AS EXSPECTED NEED TO FIX (not save opponent in db sometimes)
         referee_dict = { 
             'r' : ['s', 'p', 'r'],
             'p' : ['r', 's', 'p'],
@@ -114,9 +121,9 @@ class GameRoomConsumer(WebsocketConsumer):
         }
         winner = None
         if self.opponent_weapon == referee_dict[self.owner_weapon][0]:
-            winner = self.owner
+            winner = self.owner[0]
         elif self.opponent_weapon == referee_dict[self.owner_weapon][1]:
-            winner = self.opponent
+            winner = self.opponent[0]
         elif self.opponent_weapon == referee_dict[self.owner_weapon][2]:
             winner = False
         print(winner)
@@ -132,24 +139,34 @@ class GameRoomConsumer(WebsocketConsumer):
                     'opponent_weapon': self.opponent_weapon,
                 }
             )
+        if winner:
+            self.game.game_end_status = True
+            if winner == self.owner[0]:
+                self.game.winner = self.owner[1]
+            elif winner == self.opponent[0]:
+                self.game.winner = self.opponent[1]
+            self.game.save()
         self.owner_weapon, self.opponent_weapon = None, None
 
     def owner_weapon_choosed(self, event):
         self.owner_weapon = event['owner_weapon']
-        self.owner = event['user']
+        self.owner = event['owner']
         if self.role == 'owner' and self.opponent_weapon != None:
             self.game_referee()
 
 
     def opponent_weapon_choosed(self, event):
         self.opponent_weapon = event['opponent_weapon']
-        self.opponent = event['user']
+        self.opponent = event['opponent']
         if self.role == 'owner' and self.owner_weapon != None:
             self.game_referee()
 
     def send_result(self, event):
         self.send(text_data=json.dumps(event))
-    
+
+
+    def opponent_join_1(self, event):
+        self.send(text_data=json.dumps(event))
 
 
 class GameOnlineConsumer(WebsocketConsumer):

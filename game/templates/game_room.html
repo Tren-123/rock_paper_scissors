@@ -2,7 +2,10 @@
 
 {% block content %}
 {% load static %}
+{{ game_end_status|json_script:"game-status"}}
 <h1>Welcome to Rock-Paper-Scissors game!</h1>
+{% if game_end_status %} GAME IS END. PLEASE START NEW GAME
+{% else %}
 <h2>Rules reminder</h2>
 <ul id="list-of-rules">
     <li>You and your opponent have 3 different weapons for round - the Rock, the Paper and the Scissors</li>
@@ -17,9 +20,11 @@
         <button id="paper" >Paper</button>
         <button id="scissors" >Scissors</button>
     </div>
-    <p id="user-weapon"></p>
-    <p id="opponent-weapon"></p>
-    <p id="winner"></p>
+    <div id="owner-field"><div>Owner of room: </div><div id="owner-name">{{ game_owner }}</div><div id="owner-weapon"></div></div>
+    <div id="opponent-field"><div>Opponent: </div><div id="opponent-name"> {% if game_opponent != None %} {{ game_opponent }} {% else %} Waiting for opponent {% endif %} </div><div id="opponent-weapon"></div></div>
+    <div id="winner"></div>
+    <div id="end-game-str"></div>
 </div>
 <script src="{% static 'js/game_room.js' %}"></script>
+{% endif %}
 {% endblock %}
