@@ -4,6 +4,6 @@ from . import views
 urlpatterns = [
     path('', views.index, name= "index"),
     path('game/', views.game, name= "game"),
-    path('game_online/', views.game_online, name= "game_online"),
-    path('game/<int:pk>/', views.game_room, name="game_room")
+    path('game/<int:pk>/', views.game_room, name="game_room"),
+    path('game/waiting/<int:pk>/', views.waiting_opponent_view, name="waiting_opponent"),
     ]

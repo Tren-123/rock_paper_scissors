@@ -1,36 +1,36 @@
 import json
-from random import randint
-from asyncio import sleep, gather
-from channels.generic.websocket import AsyncWebsocketConsumer, WebsocketConsumer
-import time
-from .models import Test_model, Game
-from channels.auth import get_user
+from channels.generic.websocket import WebsocketConsumer
+from .models import Game
 from asgiref.sync import async_to_sync
 
 
 class IndexConsumer(WebsocketConsumer):
+    """ Consumer for user on index page """
     def __init__(self, *args, **kwargs):
         super().__init__(args, kwargs)
-        self.room_name = None
-        self.room_group_name = None
         self.game = None
         self.user = None
     def connect(self):
+        # connect with consumer with client side
         self.user = self.scope['user']
         self.accept()
     def receive(self, text_data=None, bytes_data=None):
+        # Handle message from frontend
         text_data_json = json.loads(text_data)
+        # Request list of game with vacant opponent role from db and send it to frontend 
         if text_data_json['message'] == 'update':
             data = Game.objects.filter(opponent__isnull = True, game_end_status = False).order_by("date_of_the_game")
             list_of_game = []
             for i in data:
                 list_of_game.append((str(i), i.id))
             self.send(json.dumps({'message' : 'update', 'list_of_game' : list_of_game}))
+        # Updated db - fill opponent field  
         elif text_data_json['message'] == 'opponent_connected':
             self.game = Game.objects.get(id=text_data_json['game_id'])
             self.game.opponent = self.user
             self.game.save()
             print(text_data_json['game_id'])
+        # Create new instance for game in and fill owner field. Send message with new game id to frontend
         elif text_data_json['message'] == 'create_game':
             new_game = Game(game_name=text_data_json['game_name'], owner=self.user)
             new_game.save()
@@ -39,7 +39,31 @@ class IndexConsumer(WebsocketConsumer):
             print(text_data_json)
 
 
+class WaitingOpponentConsumer(WebsocketConsumer):
+    """ Consumer for user - owner of the game, which waiting opponent. Working on waiting opponent web page """
+    def __init__(self, *args, **kwargs):
+        super().__init__(args, kwargs)
+        self.game = None
+        self.user = None
+    def connect(self):
+        # connect with consumer with client side
+        self.user = self.scope['user']
+        self.game_id = self.scope['url_route']['kwargs']['pk']
+        self.game = Game.objects.get(id=self.game_id)
+        self.accept()
+    def receive(self, text_data=None, bytes_data=None):
+        # handle message from frontend
+        text_data_json = json.loads(text_data)
+        # Request game instancce from db and check if opponent role filled. If yes - send message to frontend 
+        if text_data_json['message'] == 'update':
+            data = Game.objects.get(id=self.game_id)
+            if data.opponent:
+                self.send(json.dumps({'message' : 'opponent_here', 'game_id' : self.game_id}))
+    
+
+
 class GameRoomConsumer(WebsocketConsumer):
+    """ Consumer for user in game room """
     def __init__(self, *args, **kwargs):
         super().__init__(args, kwargs)
         self.game_id = None
@@ -53,6 +77,7 @@ class GameRoomConsumer(WebsocketConsumer):
         self.opponent_weapon = None
 
     def connect(self):
+        # connect with consumer with client side. Check role and set instance parameters. Added new consumer instance in group in chanell layer
         self.user = self.scope['user']
         self.game_id = self.scope['url_route']['kwargs']['pk']
         self.game = Game.objects.get(id=self.game_id)
@@ -65,30 +90,24 @@ class GameRoomConsumer(WebsocketConsumer):
             print(f'i am onwer - { self.game.owner}')
             self.accept()
             self.role = 'owner'
-    
         elif self.user == self.game.opponent:
             print(f'i am opponent - { self.game.opponent}')
             self.accept()
             self.role = 'opponent'
-            async_to_sync(self.channel_layer.group_send)( #DONT WORK AS EXSPECTED NEED TO FIX (not send message after opponent connected sometime)
-                self.game_group_name,
-                {
-                    'type': 'opponent_join_1',
-                    'user': self.user.username,
-                }
-            )
             
 
     def disconnect(self, close_code):
-        print(f'connection forbiden or lost, close code {close_code}')
+        # Disconnect consumer instance from client side and discard chanell name from group in chanell layer
+        print(f'connection closed, CLOSE CODE: {close_code}')
         async_to_sync(self.channel_layer.group_discard)(
             self.game_group_name,
             self.channel_name,
         )
     
     def receive(self, text_data=None, bytes_data=None):
+        # handle message from frontend
         text_data_json = json.loads(text_data)
-
+        # get owner/opponent weapon choise from frontend and send message to group in chanell layer
         if text_data_json['message'] == 'weapon_choose':
             if self.role == 'owner':
                 self.owner_weapon = text_data_json['weapon'][0].lower()
@@ -111,9 +130,11 @@ class GameRoomConsumer(WebsocketConsumer):
                     'opponent_weapon': f'{self.opponent_weapon}',
                 }
             )
-    
 
-    def game_referee(self): #DONT WORK AS EXSPECTED NEED TO FIX (not save opponent in db sometimes)
+
+
+    def game_referee(self):
+        # decide game result, send it to group on frontend and set it to db if winner determined
         referee_dict = { 
             'r' : ['s', 'p', 'r'],
             'p' : ['r', 's', 'p'],
@@ -126,7 +147,6 @@ class GameRoomConsumer(WebsocketConsumer):
             winner = self.opponent[0]
         elif self.opponent_weapon == referee_dict[self.owner_weapon][2]:
             winner = False
-        print(winner)
         
         async_to_sync(self.channel_layer.group_send)(
                 self.game_group_name,
@@ -149,6 +169,7 @@ class GameRoomConsumer(WebsocketConsumer):
         self.owner_weapon, self.opponent_weapon = None, None
 
     def owner_weapon_choosed(self, event):
+        # handle owner_weapon_choosed event. If called inside owner consumer and opponent have already choose weapon - call  game_referee method to decided game
         self.owner_weapon = event['owner_weapon']
         self.owner = event['owner']
         if self.role == 'owner' and self.opponent_weapon != None:
@@ -156,33 +177,16 @@ class GameRoomConsumer(WebsocketConsumer):
 
 
     def opponent_weapon_choosed(self, event):
+        # handle opponent_weapon_choosed event. If called inside owner consumer and owner have already choose weapon - call  game_referee method to decided game
         self.opponent_weapon = event['opponent_weapon']
         self.opponent = event['opponent']
         if self.role == 'owner' and self.owner_weapon != None:
             self.game_referee()
 
     def send_result(self, event):
+        # handle send_result method from game_referee method
         self.send(text_data=json.dumps(event))
 
 
-    def opponent_join_1(self, event):
-        self.send(text_data=json.dumps(event))
-
-
-class GameOnlineConsumer(WebsocketConsumer):
-    def connect(self):
-        self.accept()
-        print(f'chanel name - {self.channel_name}')
-    def receive(self, text_data):
-        if text_data == 'You win!':
-            to_db = Test_model(game_result = 'Win')
-            print('User win')
-        elif text_data == 'You lose!':
-             print('User lose')
-             to_db = Test_model(game_result ='Lose')
-        else:
-            to_db = Test_model(game_result ='Draw')
-            print(text_data)
-        to_db.save()
 
 

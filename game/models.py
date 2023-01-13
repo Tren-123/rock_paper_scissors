@@ -6,9 +6,6 @@ class User(AbstractUser):
     """ Now it is not using, but can be usefull in case of custom user model needs """
     pass
 
-class Test_model(models.Model):
-    game_result = models.TextField()
-
 
 class Game(models.Model):
     """ Model to represent game condition """

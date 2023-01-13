@@ -1,0 +1,15 @@
+let socket = new WebSocket('ws://' + window.location.host + '/ws' + window.location.pathname) // open websocket connection with server
+console.log('ws://' + window.location.host + '/ws' + window.location.pathname)
+setInterval(requestUpdates, 2000) // sending request untill opponent field in game intance fill 
+
+function requestUpdates(){ // send message for requesting update from server
+    socket.send(JSON.stringify({'message' : 'update'}))
+}
+
+socket.onmessage = function(e){ // get messame from server. If opponent field in game intance fill redirect user to game room web page  
+    let djangoData = JSON.parse(e.data);
+    console.log(djangoData.message)
+    if (djangoData.message === 'opponent_here'){
+        window.location.href = 'http://' + window.location.host + '/index/game/' + djangoData.game_id + '/';
+    };
+    }

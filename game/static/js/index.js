@@ -7,12 +7,12 @@ let li = document.createElement('li');
 let joinButton = document.createElement('button');
 joinButton.innerText = 'Join'
 
-socket.onmessage = function(e){
+socket.onmessage = function(e){ // listen messages from server
     let djangoData = JSON.parse(e.data);
     console.log(djangoData.message)
-    if (djangoData.message === 'update'){
+    if (djangoData.message === 'update'){ // update list of available games on web page
     availableGame.innerHTML = ''
-    djangoData.list_of_game.forEach((item) => {
+    djangoData.list_of_game.forEach((item) => { // add button to join game to each game from list
     // Add the item text
     li.innerHTML += item[0];
     joinButton.setAttribute("id", item[1])
@@ -26,27 +26,27 @@ socket.onmessage = function(e){
     joinButton.innerText = 'Join';
     
 });
-    Array.from(document.getElementsByClassName("join-buttons"))
+    Array.from(document.getElementsByClassName("join-buttons")) // add event listner to joinButtons
     .forEach(function(element){
-        element.addEventListener("click", function(){
+        element.addEventListener("click", function(){ // send message to server whan user click join button
             socket.send(JSON.stringify({'message' : 'opponent_connected', 'game_id' : element.id}))
-            window.location.href = 'http://' + window.location.host + '/index/game/' + element.id + '/';
+            window.location.href = 'http://' + window.location.host + '/index/game/' + element.id + '/'; // redirect user to game room
         });
 })
-} else if (djangoData.message === 'new_game'){
-        window.location.href = 'http://' + window.location.host + '/index/game/' + djangoData.id + '/';
+} else if (djangoData.message === 'new_game'){ // redirect user to waiting opponent web page
+        window.location.href = 'http://' + window.location.host + '/index/game/waiting/' + djangoData.id + '/';
         }
 }
 
-setInterval(requestUpdates, 2000)
+setInterval(requestUpdates, 2000) // sending request each 2 sec
 
-function requestUpdates(){
+function requestUpdates(){ // send request for updates list of available games to server
     socket.send(JSON.stringify({'message' : 'update'}))
 }
 
-createGame.addEventListener("click", createGameRequest)
+createGame.addEventListener("click", createGameRequest) // event listener for createGame button
 
-function createGameRequest(){
+function createGameRequest(){ // send create_game message with game name to server
     socket.send(JSON.stringify({'message' : 'create_game', 'game_name' : createGameInput.value}))
 }
 
