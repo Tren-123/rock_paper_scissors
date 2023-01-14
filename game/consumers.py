@@ -94,6 +94,8 @@ class GameRoomConsumer(WebsocketConsumer):
             print(f'i am opponent - { self.game.opponent}')
             self.accept()
             self.role = 'opponent'
+        else:
+            self.close()
             
 
     def disconnect(self, close_code):

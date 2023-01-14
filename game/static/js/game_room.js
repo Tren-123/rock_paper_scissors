@@ -41,7 +41,7 @@ socket.onmessage = function(e){ // listen messages from server
                 opponent.childNodes[2].innerText = wpnDict[data.opponent_weapon];
                 if (data.winner != false ){
                 winner.innerText = 'Winner ' + data.winner
-                endGame()
+                endGame(socket)
             }
                 else{
                     winner.innerText = 'Draw'
@@ -54,9 +54,10 @@ socket.onmessage = function(e){ // listen messages from server
     }
 }
 
-function endGame(){ // if winner determinated freeze buttons and show endGameString
+function endGame(socket){ // if winner determinated freeze buttons, show endGameString and close websocket connection
 for (weapon of weapons.childNodes) {
     weapon.disabled = true
     endGameString.innerText = 'GAME IS END. PLEASE START NEW GAME'
+    socket.close()
 }
 }
