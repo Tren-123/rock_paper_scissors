@@ -22,7 +22,7 @@ class IndexConsumer(WebsocketConsumer):
             data = Game.objects.filter(opponent__isnull = True, game_end_status = False).order_by("date_of_the_game")
             list_of_game = []
             for i in data:
-                list_of_game.append((str(i), i.id))
+                list_of_game.append((str(i), i.id, str(i.owner)))
             self.send(json.dumps({'message' : 'update', 'list_of_game' : list_of_game}))
         # Updated db - fill opponent field  
         elif text_data_json['message'] == 'opponent_connected':

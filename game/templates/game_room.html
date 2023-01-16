@@ -4,7 +4,7 @@
 {% load static %}
 {{ game_end_status|json_script:"game-status"}}
 <h1>Welcome to Rock-Paper-Scissors game!</h1>
-{% if game_end_status %} GAME IS END. PLEASE START NEW GAME
+{% if game_end_status %} GAME IS END. TO START NEW GAME: <button class="btn btn-success btn-sm" id="return-to-index" onclick="location.href='http://' + window.location.host + '/index/'">Return to index page</button>
 {% else %}
 <h2>Rules reminder</h2>
 <ul id="list-of-rules">
@@ -14,11 +14,11 @@
     <li>If your weapon beats opponents weapon - your win</li>
 </ul>
 <div class="playground">
-    <p id="choosing-text"></p>
+    <p id="choosing-text">Choose your weapon:</p>
     <div class="weapons">
-        <button id="rock" >Rock</button>
-        <button id="paper" >Paper</button>
-        <button id="scissors" >Scissors</button>
+        <button class="btn btn-success btn-sm" id="rock" >Rock</button>
+        <button class="btn btn-success btn-sm" id="paper" >Paper</button>
+        <button class="btn btn-success btn-sm" id="scissors" >Scissors</button>
     </div>
     <div id="owner-field"><div>Owner of room: </div><div id="owner-name">{{ game_owner }}</div><div id="owner-weapon"></div></div>
     <div id="opponent-field"><div>Opponent: </div><div id="opponent-name"> {% if game_opponent != None %} {{ game_opponent }} {% else %} Waiting for opponent {% endif %} </div><div id="opponent-weapon"></div></div>

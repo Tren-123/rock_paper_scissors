@@ -26,4 +26,7 @@ def game_room(request, pk):
 def waiting_opponent_view(request, pk):
     """ View for waiting opponent web page """
     game = Game.objects.get(id=pk)
-    return render(request, 'waiting_opponent.html')
+    context = {
+        'game_name' : game.game_name
+    }
+    return render(request, 'waiting_opponent.html', context=context)

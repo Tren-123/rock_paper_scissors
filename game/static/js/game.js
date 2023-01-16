@@ -1,24 +1,24 @@
-const wpns = document.querySelectorAll('#my_rock, #my_paper, #my_scissors') // buttons for choosing user weapon
-const ywpn = document.querySelector('.result') // string with user weapon 
-const owpn = document.querySelector('.opponent-weapon') // string with opponent weapon 
-const wnr = document.querySelector('.winner') // string with winer results
+const wpns = document.querySelectorAll('#rock, #paper, #scissors'); // buttons for choosing user weapon
+const ywpn = document.querySelector('.result'); // string with user weapon 
+const owpn = document.querySelector('.opponent-weapon'); // string with opponent weapon 
+const wnr = document.querySelector('.winner'); // string with winer results
 const wpnDict = { // dictionary with myWeapon : [win if opp have this weapon, lose if opp have this weapon, draw if opp have this weapon]
     rock : ['scissors', 'paper', 'rock'],
     paper : ['rock', 'scissors', 'paper'],
     scissors : ['paper', 'rock', 'scissors']
-} 
-let resetButton // button to reset game after check results
-let indexOpponentWeapon = getRandomIndex(wpns.length) // index of opp weapon in wpns array. Choosing randomly in getRandomIndex function
+};
+let resetButton; // button to reset game after check results
+let indexOpponentWeapon = getRandomIndex(wpns.length); // index of opp weapon in wpns array. Choosing randomly in getRandomIndex function
 
 // listen of click event of weapon buttons
 for (weapon of wpns) {
     weapon.addEventListener('click', function() {
-      let yourWpn = this.innerText.toLowerCase()
-      let oppWpn = wpns[indexOpponentWeapon].innerText.toLowerCase()
-      ywpn.innerText = `Your weapon - ${this.innerText}`
-      owpn.innerText = `Opponent weapon - ${wpns[indexOpponentWeapon].innerText}`
-      checkWpns(wpnDict[yourWpn], oppWpn)
-      setGameOver()
+      let yourWpn = this.innerText.toLowerCase();
+      let oppWpn = wpns[indexOpponentWeapon].innerText.toLowerCase();
+      ywpn.innerText = `Your weapon - ${this.innerText}`;
+      owpn.innerText = `Opponent weapon - ${wpns[indexOpponentWeapon].innerText}`;
+      checkWpns(wpnDict[yourWpn], oppWpn);
+      setGameOver();
     });
   }
 
@@ -42,14 +42,15 @@ function checkWpns(yourWpn, oppWpn) {
         wnr.style.backgroundColor = 'grey'
     }
 
-}
+};
 
 // freeze buttons of choosing weapon and create button of reset game
 function setGameOver() {
     for (weapon of wpns){
         weapon.disabled = true
-    }
+    };
     resetButton = document.createElement('button');
+    resetButton.setAttribute('class', 'btn btn-success btn-sm');
     resetButton.textContent = 'Start new game';
     document.body.append(resetButton);
     resetButton.addEventListener('click', resetGame);
@@ -57,7 +58,7 @@ function setGameOver() {
 
 // delete text with user, opponent weapons and winner, unfreeze buttons whith choosing weapons, remove reset button, set new random index value
 function resetGame() {
-        const resetResults = [ywpn, owpn, wnr]
+        const resetResults = [ywpn, owpn, wnr];
         for (const resetResult of resetResults) {
             resetResult.textContent = '';
         }
@@ -66,8 +67,8 @@ function resetGame() {
 
         for (weapon of wpns){
             weapon.disabled = false
-        }
-        indexOpponentWeapon = getRandomIndex(wpns.length)
+        };
+        indexOpponentWeapon = getRandomIndex(wpns.length);
 
     }
 

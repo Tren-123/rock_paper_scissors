@@ -3,7 +3,8 @@
 {% block content %}
 {% load static %}
 <h1>Welcome to Rock-Paper-Scissors game!</h1>
-<div id="frase-to-owner">Game is created successfully. Waiting your opponent</div>
+<div id="frase-to-owner">Game <i><u>{{ game_name }}</u></i> is created successfully. <br>Please stay on this page, you will redirect to game after opponent joined automatically.
+ <br>Waiting your opponent</div>
 
 <script src="{% static 'js/waiting_opponent.js' %}"></script>
 

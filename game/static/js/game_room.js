@@ -14,8 +14,11 @@ const wpnDict = { // dictionary with {1st letter of weapon : full name of weapon
 let rockButton = document.querySelector('#rock') // var for Rock button
 let paperButton = document.querySelector('#paper') // var for Paper button
 let scissorsButton = document.querySelector('#scissors') // var for Scissors button
-let resetButton // var for button to reset game after check results
-let reultOfGame // var for store result of the game and send it to sever after
+let returnToIndex = document.createElement('button'); // var for button to return to index page after game ending
+returnToIndex.innerText = 'Return to index page';
+returnToIndex.setAttribute("id", "return-to-index");
+returnToIndex.setAttribute("class", "btn btn-success btn-sm join-buttons");
+
 
 if (gameStatus != true){
 let socket = new WebSocket('ws://' + window.location.host + '/ws' + window.location.pathname) // var for WebSocket object 
@@ -37,10 +40,17 @@ socket.onmessage = function(e){ // listen messages from server
         console.log(data);
         switch (data.type) {
             case "send_result": // if message with result set customer view based on results
-                owner.childNodes[2].innerText = wpnDict[data.owner_weapon];
-                opponent.childNodes[2].innerText = wpnDict[data.opponent_weapon];
+                owner.childNodes[2].innerText = `Choosed weapon - ${wpnDict[data.owner_weapon]}`;
+                opponent.childNodes[2].innerText = `Choosed weapon - ${wpnDict[data.opponent_weapon]}`;
                 if (data.winner != false ){
-                winner.innerText = 'Winner ' + data.winner
+                winner.innerText = 'Winner: ' + data.winner
+                if (data.winner === data.owner[0]) {
+                    console.log(data.winner, data.owner)
+                    owner.style.backgroundColor = 'darkseagreen'
+                }else{
+                    console.log(data.winner, data.opponent)
+                    opponent.style.backgroundColor = 'darkseagreen'
+                }
                 endGame(socket)
             }
                 else{
@@ -56,8 +66,11 @@ socket.onmessage = function(e){ // listen messages from server
 
 function endGame(socket){ // if winner determinated freeze buttons, show endGameString and close websocket connection
 for (weapon of weapons.childNodes) {
-    weapon.disabled = true
-    endGameString.innerText = 'GAME IS END. PLEASE START NEW GAME'
-    socket.close()
-}
+    weapon.disabled = true}
+endGameString.innerText = 'GAME IS END. TO START NEW GAME:'
+endGameString.appendChild(returnToIndex);
+returnToIndex.onclick = function(){
+    window.location.href = 'http://' + window.location.host + '/index/'
+};
+socket.close()
 }

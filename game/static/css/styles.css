@@ -4,3 +4,17 @@ body {
     min-width: 480px;
     margin: 0 auto;
   }
+  #owner-field {
+      margin: 10px;
+      border-style: solid;
+      border-color: green;
+      border-width: 1px;
+      border-radius: 5px;
+    }
+  #opponent-field {
+    margin: 10px;
+    border-style: solid;
+    border-color: green;
+    border-width: 1px;
+    border-radius: 5px;
+  }
