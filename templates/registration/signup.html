@@ -1,0 +1,13 @@
+{% extends "base_template.html" %}
+
+{% block content %}
+<h1>Sign Up</h1>
+<form method="post">
+    {% csrf_token %}
+    <table>
+        {{ form }}
+    </table>
+</form>
+<input type="submit" class="btn btn-success btn-sm" value="Save">
+
+{% endblock %}

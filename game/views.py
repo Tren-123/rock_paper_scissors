@@ -13,11 +13,12 @@ def index(request):
 
 
 def game(request):
+    """ View for ofline game page """
     return render(request, 'game.html')
 
 
 def game_room(request, pk):
-    """ View for game_room web page """
+    """ View for game_room page """
     game = Game.objects.get(id=pk)
     context = {
         'game_owner' : game.owner,
@@ -29,7 +30,7 @@ def game_room(request, pk):
 
 
 def waiting_opponent_view(request, pk):
-    """ View for waiting opponent web page """
+    """ View for waiting opponent page """
     game = Game.objects.get(id=pk)
     context = {
         'game_name' : game.game_name
@@ -38,14 +39,13 @@ def waiting_opponent_view(request, pk):
 
 
 def NewUserCreate(request, *args, **kwargs):
-    """ View for signin new user web page """
+    """ View for signin new user page """
     if request.method == 'POST':
         form = CreateUserForm(request.POST)
         new_user_username = form["username"].value()
         new_user_password1 = form["password1"].value()
         new_user_password2 = form["password2"].value()
         if form.is_valid():
-            print(form.cleaned_data)
             try:
                 validate_password(form.cleaned_data['password1'])
                 if new_user_password1 == new_user_password2:
@@ -57,4 +57,4 @@ def NewUserCreate(request, *args, **kwargs):
             
     else:
         form = CreateUserForm()
-    return render(request, 'registration/signin.html', {'form': form})
+    return render(request, 'registration/signup.html', {'form': form})
