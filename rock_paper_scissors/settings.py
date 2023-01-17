@@ -139,7 +139,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Custom user model
 AUTH_USER_MODEL = 'game.User'
-
+LOGIN_REDIRECT_URL = '/'
 
 try:
     from rock_paper_scissors.local_settings import *
