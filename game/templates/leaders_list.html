@@ -1,0 +1,21 @@
+{% extends "base_template.html" %}
+
+{% block content %}
+<h1>Leaders list</h1>
+<table class="table table-striped test-table" id="available-game">
+    <tr>
+      <th>username</th>
+      <th>games played</th>
+      <th>games won</th>
+    </tr>
+    <tbody id="available-game-tbody">
+      {% for user_result in list_of_users_results %}
+        <tr>
+          <td>{{ user_result.username }}</td>
+          <td>{{ user_result.games_played }}</td>
+          <td>{{ user_result.games_won }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

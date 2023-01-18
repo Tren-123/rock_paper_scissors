@@ -1,6 +1,6 @@
 import json
 from channels.generic.websocket import WebsocketConsumer
-from .models import Game
+from .models import Game, UserProfile
 from asgiref.sync import async_to_sync
 
 
@@ -73,6 +73,9 @@ class GameRoomConsumer(WebsocketConsumer):
         self.role = None
         self.owner = None
         self.opponent = None
+        self.owner_profile = None
+        self.opponent_profile = None
+        self.owner_opponent_games_played_and_won = None
         self.owner_weapon = None
         self.opponent_weapon = None
 
@@ -82,6 +85,12 @@ class GameRoomConsumer(WebsocketConsumer):
         self.game_id = self.scope['url_route']['kwargs']['pk']
         self.game = Game.objects.get(id=self.game_id)
         self.game_group_name = f'game_{self.game_id}'
+        self.owner_profile = UserProfile.objects.get(user_id=self.game.owner_id)
+        self.opponent_profile = UserProfile.objects.get(user_id=self.game.opponent_id)
+        self.owner_opponent_games_played_and_won = {
+                'owner' : [self.owner_profile.games_played, self.owner_profile.games_won],
+                'opponent' : [self.opponent_profile.games_played, self.opponent_profile.games_won],
+                }
         async_to_sync(self.channel_layer.group_add)(
             self.game_group_name,
             self.channel_name,
@@ -163,11 +172,17 @@ class GameRoomConsumer(WebsocketConsumer):
             )
         if winner:
             self.game.game_end_status = True
+            self.owner_profile.games_played = self.owner_opponent_games_played_and_won['owner'][0] + 1
+            self.opponent_profile.games_played = self.owner_opponent_games_played_and_won['opponent'][0] + 1
             if winner == self.owner[0]:
-                self.game.winner = self.owner[1]
+                self.game.winner = self.game.owner
+                self.owner_profile.games_won = self.owner_opponent_games_played_and_won['owner'][1] + 1
             elif winner == self.opponent[0]:
-                self.game.winner = self.opponent[1]
+                self.game.winner = self.game.opponent
+                self.opponent_profile.games_won = self.owner_opponent_games_played_and_won['opponent'][1] + 1
             self.game.save()
+            self.owner_profile.save()
+            self.opponent_profile.save()
         self.owner_weapon, self.opponent_weapon = None, None
 
     def owner_weapon_choosed(self, event):

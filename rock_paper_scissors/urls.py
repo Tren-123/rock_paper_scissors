@@ -23,5 +23,5 @@ urlpatterns = [
     path('', RedirectView.as_view(url="index/", permanent=True)),
     path('index/', include('game.urls')),
     path('accounts/', include('django.contrib.auth.urls')),
-    path('accounts/signup/', views.NewUserCreate, name='user_signup'),
+    path('accounts/signup/', views.NewUserCreate, name='signup'),
 ]
