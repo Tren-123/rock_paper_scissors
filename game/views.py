@@ -82,6 +82,10 @@ def user_profile(request, user_id):
     userprofile = UserProfile.objects.get(user_id=user_id)
     context = {
         'username' : user.username,
+        'first_name' : user.first_name,
+        'last_name' : user.last_name,
+        'date_of_birth' : userprofile.date_of_birth,
+        'short_bio' : userprofile.short_bio,
         'games_won' : userprofile.games_won,
         'games_played' : userprofile.games_played
     }

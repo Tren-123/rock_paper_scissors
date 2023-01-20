@@ -11,6 +11,7 @@ socket.onmessage = function(e){ // listen messages from server
     console.log(djangoData.message);
     if (djangoData.message === 'update'){ // update list of available games on web page
     tblBody.innerHTML = '';
+    globalThis.user = djangoData.user;
     djangoData.list_of_game.forEach((item) => { // add button to join game to each game from list
     // creates a table row
     let row = document.createElement("tr");
@@ -40,8 +41,12 @@ socket.onmessage = function(e){ // listen messages from server
     Array.from(document.getElementsByClassName("join-buttons"))
     .forEach(function(element){
         element.addEventListener("click", function(){ // send message to server whan user click join button
-            socket.send(JSON.stringify({'message' : 'opponent_connected', 'game_id' : element.id}));
-            window.location.href = 'http://' + window.location.host + '/index/game/' + element.id + '/'; // redirect user to game room
+            if (user !== ''){ 
+                socket.send(JSON.stringify({'message' : 'opponent_connected', 'game_id' : element.id}));
+                window.location.href = 'http://' + window.location.host + '/index/game/' + element.id + '/'; // redirect user to game room
+            } else{
+                window.alert('to join the game please login')
+            }
         });
 })
 } else if (djangoData.message === 'new_game'){ // redirect user to waiting opponent web page
@@ -58,5 +63,9 @@ function requestUpdates(){ // send request for updates list of available games t
 createGame.addEventListener("click", createGameRequest); // event listener for createGame button
 
 function createGameRequest(){ // send create_game message with game name to server
+    if (user !== ''){ 
     socket.send(JSON.stringify({'message' : 'create_game', 'game_name' : createGameInput.value}))
+    } else{
+        window.alert('to create game please login')
+    }
 };

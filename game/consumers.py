@@ -23,8 +23,8 @@ class IndexConsumer(WebsocketConsumer):
             list_of_game = []
             for i in data:
                 list_of_game.append((str(i), i.id, str(i.owner)))
-            self.send(json.dumps({'message' : 'update', 'list_of_game' : list_of_game}))
-        # Updated db - fill opponent field  
+            self.send(json.dumps({'message' : 'update', 'user' : self.user.username, 'list_of_game' : list_of_game}))
+        # Updated db - fill opponent field 
         elif text_data_json['message'] == 'opponent_connected':
             self.game = Game.objects.get(id=text_data_json['game_id'])
             self.game.opponent = self.user
@@ -32,11 +32,13 @@ class IndexConsumer(WebsocketConsumer):
             print(text_data_json['game_id'])
         # Create new instance for game in and fill owner field. Send message with new game id to frontend
         elif text_data_json['message'] == 'create_game':
-            new_game = Game(game_name=text_data_json['game_name'], owner=self.user)
-            new_game.save()
-            print(new_game)
-            self.send(json.dumps({'message' : 'new_game', 'id' : new_game.id}))
-            print(text_data_json)
+            if self.user.is_authenticated:
+                new_game = Game(game_name=text_data_json['game_name'], owner=self.user)
+                new_game.save()
+                print(new_game)
+                self.send(json.dumps({'message' : 'new_game', 'id' : new_game.id}))
+                print(text_data_json)
+
 
 
 class WaitingOpponentConsumer(WebsocketConsumer):
