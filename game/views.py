@@ -66,9 +66,9 @@ def leader_list(request):
     """ View for game_room page """
     users_results = UserProfile.objects.all()
     list_of_users_results= []
-    User_info = namedtuple('User_info', 'username, games_played, games_won')
+    User_info = namedtuple('User_info', 'user_id, username, games_played, games_won')
     for user in users_results:
-        list_of_users_results.append(User_info(str(user.user), user.games_played, user.games_won))
+        list_of_users_results.append(User_info(user.user_id, str(user.user), user.games_played, user.games_won))
     sorted_list_by_games_won = sorted(list_of_users_results, key=lambda user_tupple: user_tupple.games_won, reverse=True)
     context = {
         'list_of_users_results' : sorted_list_by_games_won,

@@ -11,7 +11,7 @@
     <tbody id="available-game-tbody">
       {% for user_result in list_of_users_results %}
         <tr>
-          <td>{{ user_result.username }}</td>
+          <td><a href="{% url 'user_profile' user_result.user_id %}">{{ user_result.username }}</a></td>
           <td>{{ user_result.games_played }}</td>
           <td>{{ user_result.games_won }}</td>
         </tr>

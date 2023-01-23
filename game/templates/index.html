@@ -14,6 +14,16 @@
 </table>
 <h2>Create your own game</h2>
 <div><input id="create-game-input" type="text" placeholder="Input game name"><button class="btn btn-success btn-sm" id="create-game">Create game</button></div>
-<!-- ADD THIS FUNCTTIONLITY LATER <div><input id="search-game-input" type="text" placeholder="Input room name"><button id="search-game">Search existing game</button></div> -->
+
+{% endblock %}
+{% block chat %}
+<div class="mb-2"><textarea class="form-control" id="chatLog" readonly></textarea></div>
+<div class="input-group">
+  <input type="text" class="form-control" id="chatMessageInput" placeholder="Enter your chat message">
+</div>
+<div class="input-group-append">
+    <button class="btn btn-success" id="chatMessageSend" type="button">Send</button>
+</div>
 <script src="{% static 'js/index.js' %}"></script>
 {% endblock %}
+

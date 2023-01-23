@@ -10,10 +10,27 @@ class IndexConsumer(WebsocketConsumer):
         super().__init__(args, kwargs)
         self.game = None
         self.user = None
+        self.index_pg_chat_name = 'chat_index_page'
+
+
     def connect(self):
         # connect with consumer with client side
         self.user = self.scope['user']
+        async_to_sync(self.channel_layer.group_add)(
+            self.index_pg_chat_name,
+            self.channel_name,
+        )
         self.accept()
+
+
+    def disconnect(self, close_code):
+        # Disconnect consumer instance from client side and discard chanell name from group in chanell layer
+        async_to_sync(self.channel_layer.group_discard)(
+            self.index_pg_chat_name,
+            self.channel_name,
+        )
+
+    
     def receive(self, text_data=None, bytes_data=None):
         # Handle message from frontend
         text_data_json = json.loads(text_data)
@@ -38,7 +55,21 @@ class IndexConsumer(WebsocketConsumer):
                 print(new_game)
                 self.send(json.dumps({'message' : 'new_game', 'id' : new_game.id}))
                 print(text_data_json)
+        elif text_data_json['message'] == 'send_message_to_chat':
+            async_to_sync(self.channel_layer.group_send)(
+            self.index_pg_chat_name,
+            {
+                'type': 'chat_send_message_to_chat',
+                'message': 'chat_send_message_to_chat',
+                'message_body': text_data_json['message_body'],
+                'user': (str(self.user)),
+            }
+            )
 
+
+    def chat_send_message_to_chat(self, event):
+        # handle chat_send_message_to_chat method
+        self.send(text_data=json.dumps(event))
 
 
 class WaitingOpponentConsumer(WebsocketConsumer):
@@ -47,12 +78,16 @@ class WaitingOpponentConsumer(WebsocketConsumer):
         super().__init__(args, kwargs)
         self.game = None
         self.user = None
+
+
     def connect(self):
         # connect with consumer with client side
         self.user = self.scope['user']
         self.game_id = self.scope['url_route']['kwargs']['pk']
         self.game = Game.objects.get(id=self.game_id)
         self.accept()
+
+
     def receive(self, text_data=None, bytes_data=None):
         # handle message from frontend
         text_data_json = json.loads(text_data)
@@ -80,6 +115,7 @@ class GameRoomConsumer(WebsocketConsumer):
         self.owner_opponent_games_played_and_won = None
         self.owner_weapon = None
         self.opponent_weapon = None
+
 
     def connect(self):
         # connect with consumer with client side. Check role and set instance parameters. Added new consumer instance in group in chanell layer
@@ -117,6 +153,7 @@ class GameRoomConsumer(WebsocketConsumer):
             self.channel_name,
         )
     
+
     def receive(self, text_data=None, bytes_data=None):
         # handle message from frontend
         text_data_json = json.loads(text_data)
@@ -201,6 +238,7 @@ class GameRoomConsumer(WebsocketConsumer):
         self.opponent = event['opponent']
         if self.role == 'owner' and self.owner_weapon != None:
             self.game_referee()
+
 
     def send_result(self, event):
         # handle send_result method from game_referee method
