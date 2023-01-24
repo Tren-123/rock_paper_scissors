@@ -180,7 +180,16 @@ class GameRoomConsumer(WebsocketConsumer):
                     'opponent_weapon': f'{self.opponent_weapon}',
                 }
             )
-
+        elif text_data_json['message'] == 'send_message_to_room_chat':
+            async_to_sync(self.channel_layer.group_send)(
+            self.game_group_name,
+            {
+                'type': 'chat_send_message_to_room_chat',
+                'message': 'chat_send_message_to_room_chat',
+                'message_body': text_data_json['message_body'],
+                'user': (str(self.user)),
+            }
+            )
 
 
     def game_referee(self):
@@ -245,5 +254,8 @@ class GameRoomConsumer(WebsocketConsumer):
         self.send(text_data=json.dumps(event))
 
 
+    def chat_send_message_to_room_chat(self, event):
+        # handle chat_send_message_to_room_chat method
+        self.send(text_data=json.dumps(event))
 
 

@@ -14,6 +14,9 @@ const wpnDict = { // dictionary with {1st letter of weapon : full name of weapon
 let rockButton = document.querySelector('#rock') // var for Rock button
 let paperButton = document.querySelector('#paper') // var for Paper button
 let scissorsButton = document.querySelector('#scissors') // var for Scissors button
+const chatLog = document.querySelector('#chatLog'); // const for chat box
+const chatMessageInput = document.querySelector('#chatMessageInput'); // const for input message text box
+const chatMessageSend = document.querySelector('#chatMessageSend'); // const for button of send message to chat
 let returnToIndex = document.createElement('button'); // var for button to return to index page after game ending
 returnToIndex.innerText = 'Return to index page';
 returnToIndex.setAttribute("id", "return-to-index");
@@ -57,12 +60,17 @@ socket.onmessage = function(e){ // listen messages from server
                     winner.innerText = 'Draw'
                 }
                 break;
+            case "chat_send_message_to_room_chat": // show message from user in chat chatLog
+                chatLog.value += `${data.user}: ${data.message_body}\n`;
+                chatLog.scrollTop = chatLog.scrollHeight;
+                console.log(`body message ${data.message_body} recived`)
+                break;
             default:
                 console.error("Unknown message type!");
                 break;
         }
     }
-}
+
 
 function endGame(socket){ // if winner determinated freeze buttons, show endGameString and close websocket connection
 for (weapon of weapons.childNodes) {
@@ -73,4 +81,14 @@ returnToIndex.onclick = function(){
     window.location.href = 'http://' + window.location.host + '/index/'
 };
 socket.close()
+};
+
+chatMessageSend.addEventListener("click", function() { // send message to server with chat message
+    if (chatMessageInput.value.length === 0) return;
+    socket.send(JSON.stringify({
+        'message':  'send_message_to_room_chat',
+        'message_body':  chatMessageInput.value
+    }));
+    chatMessageInput.value = "";
+});
 }

@@ -25,6 +25,15 @@
     <div id="winner"></div>
     <div id="end-game-str"></div>
 </div>
-<script src="{% static 'js/game_room.js' %}"></script>
 {% endif %}
+{% endblock %}
+{% block chat %}
+<div class="mb-2"><textarea class="form-control" id="chatLog" readonly></textarea></div>
+<div class="input-group">
+  <input type="text" class="form-control" id="chatMessageInput" placeholder="Enter your chat message">
+</div>
+<div class="input-group-append">
+    <button class="btn btn-success" id="chatMessageSend" type="button">Send</button>
+</div>
+<script src="{% static 'js/game_room.js' %}"></script>
 {% endblock %}

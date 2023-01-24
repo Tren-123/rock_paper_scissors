@@ -43,7 +43,7 @@ socket.onmessage = function(e){ // listen messages from server
     // add event listner to joinButtons
     Array.from(document.getElementsByClassName("join-buttons"))
     .forEach(function(element){
-        element.addEventListener("click", function(){ // send message to server whan user click join button
+        element.addEventListener("click", function(){ // send message to server after user click join button
             if (user !== ''){ 
                 socket.send(JSON.stringify({'message' : 'opponent_connected', 'game_id' : element.id}));
                 window.location.href = 'http://' + window.location.host + '/index/game/' + element.id + '/'; // redirect user to game room
@@ -72,18 +72,19 @@ createGame.addEventListener("click", createGameRequest); // event listener for c
 function createGameRequest(){ // send create_game message with game name to server
     if (user !== ''){ 
     socket.send(JSON.stringify({'message' : 'create_game', 'game_name' : createGameInput.value}))
-    } else{
+    } else {
         window.alert('to create game please login')
     }
 };
 
 chatMessageSend.addEventListener("click", function() { // send message to server with chat message
     if (chatMessageInput.value.length === 0) return;
+    if (user !== ''){ 
     socket.send(JSON.stringify({
         'message':  'send_message_to_chat',
         'message_body':  chatMessageInput.value
     }));
-    console.log(`body message ${chatMessageInput.value} sent to server`);
     chatMessageInput.value = "";
-    
+    } else {window.alert('to send chat message please login')
+    }  
 });
