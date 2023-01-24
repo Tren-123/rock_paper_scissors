@@ -2,9 +2,9 @@
 Realtime webapp for playing rock_paper_scissors online
 
 ## Description:
-Site have 2 main web page - index page with list of available games and game room page to play the game
-Users can sign up, create and change personal information, play the game in realtinme 1 by 1 in game room.
-On index page available common chat, in game rooms - rooms chat 
+Site have 2 main web page - index page with list of available games and game room page to play the game.\n
+Users can sign up, create and change personal information, play the game in realtinme 1 by 1 in game room.\n
+On index page available common chat, in game rooms - rooms chat.\n
 
 ## Technologies:
 - Django - core of the website
