@@ -2,7 +2,7 @@
 
 {% block content %}
 
-<h1>{{ username }}</h1>
+<h1>{{ username }}<a href="{% url 'edit_user_profile' user_id %}">(edit)</a></h1>
     <p>games won: {{ games_won }}</p> 
     <p>games played: {{ games_played }}</p>
     <p>first name: {{ first_name }}</p>

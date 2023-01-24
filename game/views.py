@@ -1,6 +1,6 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from .models import Game, User, UserProfile
-from .forms import CreateUserForm
+from .forms import CreateUserForm, EditUserProfileForm
 from django.contrib.auth import login
 from django.http import HttpResponseRedirect
 from django.contrib.auth.password_validation import validate_password
@@ -87,6 +87,32 @@ def user_profile(request, user_id):
         'date_of_birth' : userprofile.date_of_birth,
         'short_bio' : userprofile.short_bio,
         'games_won' : userprofile.games_won,
-        'games_played' : userprofile.games_played
+        'games_played' : userprofile.games_played,
+        'user_id': user_id,
     }
     return render(request, 'user_profile.html', context=context)
+
+
+def edit_user_profile(request, user_id):
+    """ View for handle edit user profile page """
+    user = User.objects.get(id=user_id)
+    userprofile = UserProfile.objects.get(user_id=user_id)
+    if request.user == user:
+        if request.method == 'POST':
+            form = EditUserProfileForm(request.POST)
+            first_name = form["first_name"].value()
+            last_name = form["last_name"].value()
+            about_me = form["about_me"].value()
+            if form.is_valid():
+                user.first_name = first_name
+                user.last_name = last_name
+                userprofile.short_bio = about_me
+                user.save()
+                userprofile.save()
+                return redirect(userprofile)           
+        else:
+            data = {'first_name': user.first_name, 'last_name': user.last_name, 'about_me': userprofile.short_bio}
+            form = EditUserProfileForm(initial=data)
+            context = {'form': form}
+        return render(request, 'edit_user_profile.html', context)
+    return redirect(userprofile)   
