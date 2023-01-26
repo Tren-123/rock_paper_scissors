@@ -16,15 +16,15 @@ from channels.auth import AuthMiddlewareStack
 from channels.security.websocket import AllowedHostsOriginValidator
 import django
 
-from game.routing import ws_urlpatterns
-
-
-django.setup()
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'rock_paper_scissors.settings')
 # Initialize Django ASGI application early to ensure the AppRegistry
 # is populated before importing code that may import ORM models.
+django.setup()
 django_asgi_app = get_asgi_application()
+
+from game.routing import ws_urlpatterns
+
 
 application = ProtocolTypeRouter({
     "http": django_asgi_app,
