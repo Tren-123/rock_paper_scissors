@@ -1,4 +1,4 @@
-let socket = new WebSocket('ws://127.0.0.1:8000/ws/index/');
+let socket = new WebSocket('ws://' + window.location.host + '/ws' + window.location.pathname);
 const availableGameTbl = document.querySelector('#available-game'); // const for table with available games list
 const tblBody = document.querySelector("#available-game-tbody"); // const for table body of available games list
 const createGame = document.querySelector('#create-game'); // const for create-game button
