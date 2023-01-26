@@ -24,8 +24,8 @@ returnToIndex.setAttribute("class", "btn btn-success btn-sm join-buttons");
 
 
 if (gameStatus != true){
-let socket = new WebSocket('ws://' + window.location.host + '/ws' + window.location.pathname) // var for WebSocket object 
-console.log('ws://' + window.location.host + '/ws' + window.location.pathname)
+let socket = new WebSocket('wss://' + window.location.host + '/ws' + window.location.pathname) // var for WebSocket object 
+console.log('wss://' + window.location.host + '/ws' + window.location.pathname)
 
 for (weapon of weapons.childNodes) { // listen for weapon buttons click event
     weapon.addEventListener('click', function() { // send message to server if event happend
@@ -78,7 +78,7 @@ for (weapon of weapons.childNodes) {
 endGameString.innerText = 'GAME IS END. TO START NEW GAME:'
 endGameString.appendChild(returnToIndex);
 returnToIndex.onclick = function(){
-    window.location.href = 'http://' + window.location.host + '/index/'
+    window.location.href = window.location.protocol + '//' + window.location.host + '/index/'
 };
 socket.close()
 };

@@ -1,4 +1,4 @@
-let socket = new WebSocket('ws://' + window.location.host + '/ws' + window.location.pathname);
+let socket = new WebSocket('wss://' + window.location.host + '/ws' + window.location.pathname);
 const availableGameTbl = document.querySelector('#available-game'); // const for table with available games list
 const tblBody = document.querySelector("#available-game-tbody"); // const for table body of available games list
 const createGame = document.querySelector('#create-game'); // const for create-game button
@@ -46,14 +46,14 @@ socket.onmessage = function(e){ // listen messages from server
         element.addEventListener("click", function(){ // send message to server after user click join button
             if (user !== ''){ 
                 socket.send(JSON.stringify({'message' : 'opponent_connected', 'game_id' : element.id}));
-                window.location.href = 'http://' + window.location.host + '/index/game/' + element.id + '/'; // redirect user to game room
+                window.location.href = window.location.protocol + '//' + window.location.host + '/index/game/' + element.id + '/'; // redirect user to game room
             } else{
                 window.alert('to join the game please login')
             }
         });
 })
 } else if (djangoData.message === 'new_game'){ // redirect user to waiting opponent web page
-    window.location.href = 'http://' + window.location.host + '/index/game/waiting/' + djangoData.id + '/';
+    window.location.href = window.location.protocol + '//' + window.location.host + '/index/game/waiting/' + djangoData.id + '/';
 } else if (djangoData.message === 'chat_send_message_to_chat'){ // show message from user in chat chatLog
     chatLog.value += `${djangoData.user}: ${djangoData.message_body}\n`;
     chatLog.scrollTop = chatLog.scrollHeight;
