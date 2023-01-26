@@ -7,6 +7,7 @@ services:
   - type: web
     name: rock_paper_scissors
     env: python
+    plan: free
     buildCommand: "./build.sh"
     startCommand: "daphne rock_paper_scissors.asgi:application" 
     envVars:
