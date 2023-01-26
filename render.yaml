@@ -7,7 +7,7 @@ databases:
 services:
   - type: web
     name: rock_paper_scissors
-    env: python
+    env: python3.10.6
     plan: free
     buildCommand: "./build.sh"
     startCommand: "daphne rock_paper_scissors.asgi:application" 
