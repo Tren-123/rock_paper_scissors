@@ -1,5 +1,6 @@
 databases:
   - name: rock_paper_scissors
+    plan: free
     databaseName: rock_paper_scissors
     user: pavel
 
