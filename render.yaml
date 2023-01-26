@@ -1,0 +1,20 @@
+databases:
+  - name: rock_paper_scissors
+    databaseName: rock_paper_scissors
+    user: pavel
+
+services:
+  - type: web
+    name: rock_paper_scissors
+    env: python
+    buildCommand: "./build.sh"
+    startCommand: "daphne rock_paper_scissors.asgi:application" 
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: rock_paper_scissors
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: WEB_CONCURRENCY
+        value: 4
