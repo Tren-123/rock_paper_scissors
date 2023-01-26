@@ -7,7 +7,7 @@ databases:
 services:
   - type: web
     name: rock_paper_scissors
-    env: python3.10.6
+    env: python
     plan: free
     buildCommand: "./build.sh"
     startCommand: "daphne rock_paper_scissors.asgi:application" 
@@ -20,3 +20,5 @@ services:
         generateValue: true
       - key: WEB_CONCURRENCY
         value: 4
+      - key: PYTHON_VERSION 
+        value: 3.10.6
