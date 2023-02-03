@@ -2,6 +2,8 @@ import json
 from channels.generic.websocket import WebsocketConsumer
 from .models import Game, UserProfile
 from asgiref.sync import async_to_sync
+from .orm_requests_functions import get_list_of_available_game_from_db
+
 
 
 class IndexConsumer(WebsocketConsumer):
@@ -21,6 +23,8 @@ class IndexConsumer(WebsocketConsumer):
             self.channel_name,
         )
         self.accept()
+        self.send(json.dumps({'message' : 'update', 'list_of_game': get_list_of_available_game_from_db(Game),
+                    'user': (str(self.user))}))
 
 
     def disconnect(self, close_code):
@@ -34,19 +38,20 @@ class IndexConsumer(WebsocketConsumer):
     def receive(self, text_data=None, bytes_data=None):
         # Handle message from frontend
         text_data_json = json.loads(text_data)
-        # Request list of game with vacant opponent role from db and send it to frontend 
-        if text_data_json['message'] == 'update':
-            data = Game.objects.filter(opponent__isnull = True, game_end_status = False).order_by("date_of_the_game")
-            list_of_game = []
-            for i in data:
-                list_of_game.append((str(i), i.id, str(i.owner)))
-            self.send(json.dumps({'message' : 'update', 'user' : self.user.username, 'list_of_game' : list_of_game}))
+        print(text_data_json)
         # Updated db - fill opponent field 
-        elif text_data_json['message'] == 'opponent_connected':
+        if text_data_json['message'] == 'opponent_connected':
             self.game = Game.objects.get(id=text_data_json['game_id'])
             self.game.opponent = self.user
             self.game.save()
-            print(text_data_json['game_id'])
+            async_to_sync(self.channel_layer.group_send)(
+            self.index_pg_chat_name,
+            {
+                'type': 'index_send_list_available_game_to_index',
+                'message': 'update',
+                'list_of_game': get_list_of_available_game_from_db(Game),
+            }
+            )
         # Create new instance for game in and fill owner field. Send message with new game id to frontend
         elif text_data_json['message'] == 'create_game':
             if self.user.is_authenticated:
@@ -54,7 +59,14 @@ class IndexConsumer(WebsocketConsumer):
                 new_game.save()
                 print(new_game)
                 self.send(json.dumps({'message' : 'new_game', 'id' : new_game.id}))
-                print(text_data_json)
+                async_to_sync(self.channel_layer.group_send)(
+                self.index_pg_chat_name,
+                {
+                    'type': 'index_send_list_available_game_to_index',
+                    'message': 'update',
+                    'list_of_game': get_list_of_available_game_from_db(Game),
+                }
+                )
         elif text_data_json['message'] == 'send_message_to_chat':
             async_to_sync(self.channel_layer.group_send)(
             self.index_pg_chat_name,
@@ -70,6 +82,10 @@ class IndexConsumer(WebsocketConsumer):
     def chat_send_message_to_chat(self, event):
         # handle chat_send_message_to_chat method
         self.send(text_data=json.dumps(event))
+
+    def index_send_list_available_game_to_index(self, event):
+        self.send(text_data=json.dumps(event))
+        
 
 
 class WaitingOpponentConsumer(WebsocketConsumer):

@@ -1,4 +1,4 @@
-let socket = new WebSocket('wss://' + window.location.host + '/ws' + window.location.pathname);
+let socket = new WebSocket('ws://' + window.location.host + '/ws' + window.location.pathname);
 const availableGameTbl = document.querySelector('#available-game'); // const for table with available games list
 const tblBody = document.querySelector("#available-game-tbody"); // const for table body of available games list
 const createGame = document.querySelector('#create-game'); // const for create-game button
@@ -11,10 +11,13 @@ joinButton.innerText = 'Join';
 
 socket.onmessage = function(e){ // listen messages from server
     let djangoData = JSON.parse(e.data);
+    console.log(djangoData);
     console.log(djangoData.message);
     if (djangoData.message === 'update'){ // update list of available games on web page
     tblBody.innerHTML = '';
-    globalThis.user = djangoData.user;
+    if ('user' in djangoData){
+    globalThis.user = djangoData.user
+    };
     djangoData.list_of_game.forEach((item) => { // add button to join game to each game from list
     // creates a table row
     let row = document.createElement("tr");
@@ -44,7 +47,7 @@ socket.onmessage = function(e){ // listen messages from server
     Array.from(document.getElementsByClassName("join-buttons"))
     .forEach(function(element){
         element.addEventListener("click", function(){ // send message to server after user click join button
-            if (user !== ''){ 
+            if (user !== 'AnonymousUser'){ 
                 socket.send(JSON.stringify({'message' : 'opponent_connected', 'game_id' : element.id}));
                 window.location.href = window.location.protocol + '//' + window.location.host + '/index/game/' + element.id + '/'; // redirect user to game room
             } else{
@@ -61,17 +64,13 @@ socket.onmessage = function(e){ // listen messages from server
 }
 }
 
-setInterval(requestUpdates, 2000); // sending request each 2 sec
-
-function requestUpdates(){ // send request for updates list of available games to server
-    socket.send(JSON.stringify({'message' : 'update'}));
-}
 
 createGame.addEventListener("click", createGameRequest); // event listener for createGame button
 
 function createGameRequest(){ // send create_game message with game name to server
-    if (user !== ''){ 
+    if (user !== 'AnonymousUser'){ 
     socket.send(JSON.stringify({'message' : 'create_game', 'game_name' : createGameInput.value}))
+    console.log('create game button clicked')
     } else {
         window.alert('to create game please login')
     }
@@ -79,12 +78,9 @@ function createGameRequest(){ // send create_game message with game name to serv
 
 chatMessageSend.addEventListener("click", function() { // send message to server with chat message
     if (chatMessageInput.value.length === 0) return;
-    if (user !== ''){ 
     socket.send(JSON.stringify({
         'message':  'send_message_to_chat',
         'message_body':  chatMessageInput.value
     }));
     chatMessageInput.value = "";
-    } else {window.alert('to send chat message please login')
-    }  
 });
