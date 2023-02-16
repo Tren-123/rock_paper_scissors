@@ -1,4 +1,4 @@
-let socket = new WebSocket('wss://' + window.location.host + '/ws' + window.location.pathname) // open websocket connection with server
+let socket = new WebSocket('ws://' + window.location.host + '/ws' + window.location.pathname) // open websocket connection with server
 console.log('wss://' + window.location.host + '/ws' + window.location.pathname)
 setInterval(requestUpdates, 2000) // sending request untill opponent field in game intance fill 
 
