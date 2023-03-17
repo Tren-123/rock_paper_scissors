@@ -1,15 +1,30 @@
-# rock_paper_scissors
-Realtime webapp for playing rock_paper_scissors online.
+# Учебный проект - Сайт для онлайн-игры в камень-ножницы-бумага
+Ссылка на рабочую версию сайта https://rock-paper-scissors-bl9y.onrender.com/
+## Особенности проекта:
+- Реализация онлайн игры и чата на технологии WebSocket
+- Фронтенд на JavaScript + Bootstrap
+- Бэкнд django + django channels
 
-## Description:
-Site have 2 main web page - index page with list of available games and game room page to play the game.
-Users can sign up, create and change personal information, play the game in realtime 1 by 1 in game room.
-On index page available common chat, in game rooms - rooms chat.
+## Инструкция по поднятию dev версии на локальном компьютере:
+- клонировать репозиторий
+```
+$ git clone https://github.com/Tren-123/rock_paper_scissors
+```
+- установить зависимости
+```
+$ pip install -r requirements.txt
+```
+- создать бд
+```
+$ python3 manage.py migrate
 
-## Technologies:
-- Django - core of the website
-- Django Channels - handling of websocket connections
-- Redis - Django Channels backing store
-- WebSocket - real time server-client and client-client communications
-- Bootstrap - CSS styling of components
-- JavaScript - frontend
+- создать нескольких пользователей на сайте в разделе регистрации или командой консоли:
+```
+$ python3 manage.py createsuperuser
+```
+- запустить сайт на локальном компьютетере
+```
+$ python3 manage.py runserver
+```
+- ссылка на сайт http://127.0.0.1:8000/
+
